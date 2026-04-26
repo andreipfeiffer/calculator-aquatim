@@ -1,0 +1,20 @@
+{
+  "name": "calculator-aquatim",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/andreipfeiffer/calculator-aquatim#readme",
+  "bugs": {
+    "url": "https://github.com/andreipfeiffer/calculator-aquatim/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreipfeiffer/calculator-aquatim.git"
+  },
+  "license": "ISC",
+  "author": "Andrei Pfeiffer",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
