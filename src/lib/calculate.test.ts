@@ -186,6 +186,49 @@ describe("calculate", () => {
     assert.equal(child.waterAmount, 40);
   });
 
+  it("handles sub-meter with rain water flag", () => {
+    const meters = [
+      meter({
+        meterId: 1,
+        rainWater: true,
+        previousReading: 0,
+        currentReading: 80,
+      }),
+      meter({
+        meterId: 2,
+        submeterOf: 1,
+        rainWater: true,
+        previousReading: 0,
+        currentReading: 20,
+      }),
+    ];
+
+    const result = calculate(
+      { waterCost: 100, totalVolume: 80, sewageCost: 0, rainWaterCost: 30 },
+      meters,
+    );
+
+    assert.equal(result.totalMeteredConsumption, 80);
+    assert.equal(result.volumeDifference, 0);
+    assert.equal(result.waterCost, 100);
+
+    const parent = result.charges.find((c) => c.meterId === 1)!;
+    const child = result.charges.find((c) => c.meterId === 2)!;
+
+    // Parent net = 80 - 20 = 60, child = 20
+    assert.equal(parent.consumption, 60);
+    assert.equal(parent.waterAmount, 75);
+    assert.equal(parent.sewageAmount, 0);
+    assert.equal(parent.rainWaterAmount, 15);
+    assert.equal(parent.totalAmount, 90);
+
+    assert.equal(child.consumption, 20);
+    assert.equal(child.waterAmount, 25);
+    assert.equal(child.sewageAmount, 0);
+    assert.equal(child.rainWaterAmount, 15);
+    assert.equal(child.totalAmount, 40);
+  });
+
   it("handles zero consumption across all meters", () => {
     const meters = [
       meter({ meterId: 1, previousReading: 100, currentReading: 100 }),
@@ -195,13 +238,14 @@ describe("calculate", () => {
     const result = calculate(bill, meters);
 
     assert.equal(result.totalMeteredConsumption, 0);
+    assert.equal(result.volumeDifference, 100);
+    assert.equal(result.waterCost, 200);
     assert.equal(result.charges.length, 2);
 
     const c1 = result.charges.find((c) => c.meterId === 1)!;
     const c2 = result.charges.find((c) => c.meterId === 2)!;
 
-    // Equal split when zero consumption: each gets 50%
-    // water 100, sewage 50, rain 30, total 180
+    // Equal split (1/2 each) since zero consumption
     assert.equal(c1.consumption, 0);
     assert.equal(c1.waterAmount, 100);
     assert.equal(c1.sewageAmount, 50);

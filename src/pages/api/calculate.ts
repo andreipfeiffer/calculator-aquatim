@@ -16,18 +16,6 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const invalidSubMeter = meters.find(
-    (m) => m.submeterOf !== null && m.rainWater,
-  );
-  if (invalidSubMeter) {
-    return new Response(
-      JSON.stringify({
-        error: `Sub-meter "${invalidSubMeter.name}" cannot have rain water`,
-      }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
-  }
-
   const result = calculate(bill, meters);
   return new Response(JSON.stringify(result), {
     headers: { "Content-Type": "application/json" },

@@ -96,7 +96,6 @@ export default function MeterSettings({ meters: initial }: Props) {
                 <input
                   type="checkbox"
                   checked={m.rainWater}
-                  disabled={m.submeterOf !== null}
                   onChange={(e) =>
                     handleChange(m.id, "rainWater", e.target.checked)
                   }
@@ -105,15 +104,13 @@ export default function MeterSettings({ meters: initial }: Props) {
               <td>
                 <select
                   value={m.submeterOf ?? ""}
-                  onChange={(e) => {
-                    const newSubmeterOf = e.target.value
-                      ? Number(e.target.value)
-                      : null;
-                    handleChange(m.id, "submeterOf", newSubmeterOf);
-                    if (newSubmeterOf !== null) {
-                      handleChange(m.id, "rainWater", false);
-                    }
-                  }}
+                  onChange={(e) =>
+                    handleChange(
+                      m.id,
+                      "submeterOf",
+                      e.target.value ? Number(e.target.value) : null,
+                    )
+                  }
                 >
                   <option value="">—</option>
                   {rootMeters

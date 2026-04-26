@@ -20,13 +20,6 @@ export const PUT: APIRoute = async ({ params, request }) => {
     });
   }
 
-  if (submeterOf && rainWater) {
-    return new Response(
-      JSON.stringify({ error: "Sub-meters cannot have rain water" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
-  }
-
   updateMeter(
     id,
     name,
