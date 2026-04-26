@@ -36,7 +36,6 @@ export const POST: APIRoute = async ({ request }) => {
   );
 
   saveReadings(
-    billId,
     readings.map((r: { meterId: number; value: number }) => ({
       meterId: r.meterId,
       value: r.value,

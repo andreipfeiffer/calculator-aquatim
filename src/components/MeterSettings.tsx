@@ -7,6 +7,7 @@ interface MeterData {
   active: boolean;
   sortOrder: number;
   submeterOf: number | null;
+  currentReading: number;
 }
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 export default function MeterSettings({ meters: initial }: Props) {
   const [meters, setMeters] = useState(initial);
   const [saving, setSaving] = useState<number | null>(null);
+  const [savingReading, setSavingReading] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const handleChange = (
@@ -54,6 +56,26 @@ export default function MeterSettings({ meters: initial }: Props) {
     setSaving(null);
   };
 
+  const handleSaveReading = async (meter: MeterData) => {
+    setSavingReading(meter.id);
+    setMessage(null);
+
+    const res = await fetch(`/api/meters/${meter.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reading: meter.currentReading }),
+    });
+
+    if (res.ok) {
+      setMessage(`Index ${meter.name} salvat.`);
+    } else {
+      const data = await res.json();
+      setMessage(`Eroare: ${data.error}`);
+    }
+
+    setSavingReading(null);
+  };
+
   // Root meters (not sub-meters) for the submeterOf dropdown
   const rootMeters = meters.filter((m) => m.submeterOf === null);
 
@@ -78,6 +100,7 @@ export default function MeterSettings({ meters: initial }: Props) {
             <th>Subcontor al</th>
             <th>Activ</th>
             <th>Ordine</th>
+            <th>Index curent</th>
             <th></th>
           </tr>
         </thead>
@@ -140,6 +163,28 @@ export default function MeterSettings({ meters: initial }: Props) {
                   }
                   style={{ width: "3em" }}
                 />
+              </td>
+              <td style={{ display: "flex", gap: "0.25em" }}>
+                <input
+                  type="number"
+                  value={m.currentReading}
+                  onChange={(e) =>
+                    handleChange(m.id, "currentReading", Number(e.target.value))
+                  }
+                  style={{ width: "6em" }}
+                />
+                {m.currentReading !==
+                  initial.find((im) => im.id === m.id)!.currentReading && (
+                  <button
+                    className="outline"
+                    onClick={() => handleSaveReading(m)}
+                    disabled={savingReading === m.id}
+                    aria-busy={savingReading === m.id}
+                    style={{ fontSize: "0.85em", padding: "0.25em 0.5em" }}
+                  >
+                    OK
+                  </button>
+                )}
               </td>
               <td>
                 <button

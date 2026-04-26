@@ -27,10 +27,9 @@ db.exec(`
 db.exec(`
   CREATE TABLE IF NOT EXISTS readings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    bill_id INTEGER NOT NULL,
     meter_id INTEGER NOT NULL,
     value REAL NOT NULL,
-    FOREIGN KEY (bill_id) REFERENCES bills(id),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (meter_id) REFERENCES meters(id)
   )
 `);

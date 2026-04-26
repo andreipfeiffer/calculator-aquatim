@@ -145,6 +145,35 @@ describe("calculate", () => {
     assert.equal(c2.totalAmount, 105);
   });
 
+  it("computes volume difference when metered > billed", () => {
+    const meters = [
+      meter({ meterId: 1, previousReading: 0, currentReading: 70 }),
+      meter({ meterId: 2, previousReading: 0, currentReading: 50 }),
+    ];
+
+    const result = calculate(bill, meters);
+
+    assert.equal(result.totalMeteredConsumption, 120);
+    assert.equal(result.volumeDifference, -20);
+
+    const c1 = result.charges.find((c) => c.meterId === 1)!;
+    const c2 = result.charges.find((c) => c.meterId === 2)!;
+
+    // meter 1: 70/120 ≈ 58.33% → water 116.67, sewage 58.33, rain 30, total 205
+    // meter 2: 50/120 ≈ 41.67% → water 83.33, sewage 41.67, rain 30, total 155
+    assert.equal(c1.consumption, 70);
+    assert.equal(c1.waterAmount, 116.67);
+    assert.equal(c1.sewageAmount, 58.33);
+    assert.equal(c1.rainWaterAmount, 30);
+    assert.equal(c1.totalAmount, 205);
+
+    assert.equal(c2.consumption, 50);
+    assert.equal(c2.waterAmount, 83.33);
+    assert.equal(c2.sewageAmount, 41.67);
+    assert.equal(c2.rainWaterAmount, 30);
+    assert.equal(c2.totalAmount, 155);
+  });
+
   it("handles sub-meters: parent share reduced by child consumption", () => {
     // Parent meter reads 100 total, sub-meter reads 40 of that
     const meters = [

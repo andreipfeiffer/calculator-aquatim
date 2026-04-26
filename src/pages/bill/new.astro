@@ -1,13 +1,12 @@
 ---
 import Layout from "../../components/Layout.astro";
 import "../../db/seed";
-import { listActiveMeters } from "../../db/meters";
-import { getPreviousReadings } from "../../db/bills";
+import { listActiveMeters, getLatestReadings } from "../../db/meters";
 import BillForm from "../../components/BillForm";
 
 const meters = listActiveMeters();
 const meterIds = meters.map((m) => m.id);
-const previousReadings = getPreviousReadings(meterIds);
+const previousReadings = getLatestReadings(meterIds);
 
 const meterData = meters.map((m) => ({
   id: m.id,

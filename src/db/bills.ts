@@ -10,13 +10,6 @@ export interface Bill {
   created_at: string;
 }
 
-export interface Reading {
-  id: number;
-  bill_id: number;
-  meter_id: number;
-  value: number;
-}
-
 export interface Charge {
   id: number;
   bill_id: number;
@@ -29,7 +22,6 @@ export interface Charge {
 }
 
 export interface BillDetail extends Bill {
-  readings: Reading[];
   charges: (Charge & { name: string })[];
 }
 
@@ -56,10 +48,6 @@ export function getBillById(id: number): BillDetail | undefined {
 
   if (!bill) return undefined;
 
-  const readings = db
-    .prepare(`SELECT * FROM readings WHERE bill_id = ?`)
-    .all(bill.id) as unknown as Reading[];
-
   const charges = db
     .prepare(
       `SELECT c.*, m.name
@@ -70,7 +58,7 @@ export function getBillById(id: number): BillDetail | undefined {
     )
     .all(bill.id) as unknown as (Charge & { name: string })[];
 
-  return { ...bill, readings, charges };
+  return { ...bill, charges };
 }
 
 export function listBills(
@@ -91,14 +79,13 @@ export function listBills(
 }
 
 export function saveReadings(
-  billId: number,
   readings: { meterId: number; value: number }[],
 ): void {
   const stmt = db.prepare(
-    `INSERT INTO readings (bill_id, meter_id, value) VALUES (?, ?, ?)`,
+    `INSERT INTO readings (meter_id, value) VALUES (?, ?)`,
   );
   for (const r of readings) {
-    stmt.run(billId, r.meterId, r.value);
+    stmt.run(r.meterId, r.value);
   }
 }
 
@@ -128,29 +115,6 @@ export function saveCharges(
       c.totalAmount,
     );
   }
-}
-
-export function getPreviousReadings(meterIds: number[]): Map<number, number> {
-  const result = new Map<number, number>();
-  if (meterIds.length === 0) return result;
-
-  for (const meterId of meterIds) {
-    const row = db
-      .prepare(
-        `SELECT r.value FROM readings r
-         JOIN bills b ON b.id = r.bill_id
-         WHERE r.meter_id = ?
-         ORDER BY b.month DESC
-         LIMIT 1`,
-      )
-      .get(meterId) as { value: number } | undefined;
-
-    if (row) {
-      result.set(meterId, row.value);
-    }
-  }
-
-  return result;
 }
 
 export function getBillByMonth(month: string): Bill | undefined {

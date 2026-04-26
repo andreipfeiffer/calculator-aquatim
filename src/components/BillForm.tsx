@@ -252,6 +252,8 @@ export default function BillForm({ meters }: Props) {
             {meters.map((m) => {
               const current = Number(readings[m.id]) || 0;
               const consumption = Math.max(0, current - m.previousReading);
+              const readingTooLow =
+                readings[m.id] !== "" && current < m.previousReading;
 
               return (
                 <tr key={m.id}>
@@ -270,6 +272,7 @@ export default function BillForm({ meters }: Props) {
                       }
                       placeholder={m.previousReading.toString()}
                       style={{ width: "10em", marginBottom: 0 }}
+                      aria-invalid={readingTooLow || undefined}
                     />
                   </td>
                   <td>{readings[m.id] ? consumption : "—"}</td>

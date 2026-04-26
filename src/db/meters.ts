@@ -46,3 +46,25 @@ export function updateMeter(
     `UPDATE meters SET name = ?, rain_water = ?, active = ?, sort_order = ?, submeter_of = ? WHERE id = ?`,
   ).run(name, rainWater ? 1 : 0, active ? 1 : 0, sortOrder, submeterOf, id);
 }
+
+export function insertReading(meterId: number, value: number): void {
+  db.prepare(`INSERT INTO readings (meter_id, value) VALUES (?, ?)`).run(
+    meterId,
+    value,
+  );
+}
+
+export function getLatestReadings(meterIds: number[]): Map<number, number> {
+  const result = new Map<number, number>();
+  for (const meterId of meterIds) {
+    const row = db
+      .prepare(
+        `SELECT value FROM readings WHERE meter_id = ? ORDER BY created_at DESC LIMIT 1`,
+      )
+      .get(meterId) as { value: number } | undefined;
+    if (row) {
+      result.set(meterId, row.value);
+    }
+  }
+  return result;
+}
