@@ -1,7 +1,7 @@
 {
   "name": "calculator-aquatim",
   "version": "1.0.0",
-  "description": "",
+  "description": "Water bill calculator for apartment buildings",
   "homepage": "https://github.com/andreipfeiffer/calculator-aquatim#readme",
   "bugs": {
     "url": "https://github.com/andreipfeiffer/calculator-aquatim/issues"
@@ -13,8 +13,29 @@
   "license": "ISC",
   "author": "Andrei Pfeiffer",
   "type": "module",
-  "main": "index.ts",
+  "engines": {
+    "node": ">=25"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "node --test tests/**/*.test.ts",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^10.0.0",
+    "@astrojs/react": "^5.0.0",
+    "astro": "^6.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "prettier": "^3.4.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "typescript": "^5.7.0"
   }
 }

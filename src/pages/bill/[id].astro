@@ -1,0 +1,125 @@
+---
+import Layout from "../../components/Layout.astro";
+import "../../db/seed";
+import { getBillById } from "../../db/bills";
+
+const id = Number(Astro.params.id);
+const bill = getBillById(id);
+
+if (!bill) {
+  return Astro.redirect("/history");
+}
+---
+
+<Layout title={`Factură ${bill.month}`}>
+  <h1>Factură {bill.month}</h1>
+
+  <section>
+    <h2>Detalii factură</h2>
+    <table>
+      <tbody>
+        <tr><td>Cost apă</td><td>{bill.water_cost.toFixed(2)} lei</td></tr>
+        <tr
+          ><td>Cost canalizare</td><td>{bill.sewage_cost.toFixed(2)} lei</td
+          ></tr
+        >
+        <tr
+          ><td>Cost apă pluvială</td><td
+            >{bill.rain_water_cost.toFixed(2)} lei</td
+          ></tr
+        >
+        <tr
+          ><td>Total factură</td><td
+            ><strong
+              >{
+                (
+                  bill.water_cost +
+                  bill.sewage_cost +
+                  bill.rain_water_cost
+                ).toFixed(2)
+              } lei</strong
+            ></td
+          ></tr
+        >
+        <tr><td>Volum total</td><td>{bill.total_volume.toFixed(2)} m³</td></tr>
+        <tr><td>Data înregistrării</td><td>{bill.created_at}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Repartizare pe apartamente</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Apartament</th>
+          <th>Consum (m³)</th>
+          <th>Apă</th>
+          <th>Canalizare</th>
+          <th>Apă pluvială</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          bill.charges.map((charge) => (
+            <tr>
+              <td>{charge.name}</td>
+              <td>{charge.consumption.toFixed(2)}</td>
+              <td>{charge.water_amount.toFixed(2)}</td>
+              <td>{charge.sewage_amount.toFixed(2)}</td>
+              <td>{charge.rain_water_amount.toFixed(2)}</td>
+              <td>
+                <strong>{charge.total_amount.toFixed(2)}</strong>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td
+            ><strong
+              >{
+                bill.charges.reduce((s, c) => s + c.consumption, 0).toFixed(2)
+              }</strong
+            ></td
+          >
+          <td
+            ><strong
+              >{
+                bill.charges.reduce((s, c) => s + c.water_amount, 0).toFixed(2)
+              }</strong
+            ></td
+          >
+          <td
+            ><strong
+              >{
+                bill.charges.reduce((s, c) => s + c.sewage_amount, 0).toFixed(2)
+              }</strong
+            ></td
+          >
+          <td
+            ><strong
+              >{
+                bill.charges
+                  .reduce((s, c) => s + c.rain_water_amount, 0)
+                  .toFixed(2)
+              }</strong
+            ></td
+          >
+          <td
+            ><strong
+              >{
+                bill.charges.reduce((s, c) => s + c.total_amount, 0).toFixed(2)
+              }</strong
+            ></td
+          >
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <a href="/history">← Înapoi la istoric</a>
+</Layout>

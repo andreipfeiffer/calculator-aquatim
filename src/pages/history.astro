@@ -1,0 +1,67 @@
+---
+import Layout from "../components/Layout.astro";
+import "../db/seed";
+import { listBills } from "../db/bills";
+
+const page = Number(Astro.url.searchParams.get("page") ?? 1);
+const pageSize = 12;
+const { bills, total } = listBills(page, pageSize);
+const totalPages = Math.ceil(total / pageSize);
+---
+
+<Layout title="Istoric facturi">
+  <h1>Istoric facturi</h1>
+
+  {
+    bills.length === 0 ? (
+      <p>Nu există facturi înregistrate.</p>
+    ) : (
+      <>
+        <table>
+          <thead>
+            <tr>
+              <th>Luna</th>
+              <th>Total factură</th>
+              <th>Volum</th>
+              <th>Data</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {bills.map((bill) => (
+              <tr>
+                <td>{bill.month}</td>
+                <td>
+                  {(
+                    bill.water_cost +
+                    bill.sewage_cost +
+                    bill.rain_water_cost
+                  ).toFixed(2)}{" "}
+                  lei
+                </td>
+                <td>{bill.total_volume.toFixed(2)} m³</td>
+                <td>{bill.created_at}</td>
+                <td>
+                  <a href={`/bill/${bill.id}`}>Detalii</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {totalPages > 1 && (
+          <nav>
+            {page > 1 && <a href={`/history?page=${page - 1}`}>← Anterior</a>}
+            <span>
+              {" "}
+              Pagina {page} din {totalPages}{" "}
+            </span>
+            {page < totalPages && (
+              <a href={`/history?page=${page + 1}`}>Următor →</a>
+            )}
+          </nav>
+        )}
+      </>
+    )
+  }
+</Layout>

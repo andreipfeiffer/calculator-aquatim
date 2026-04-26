@@ -1,0 +1,48 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Calculator Aquatim" } = Astro.props;
+---
+
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <title>{title}</title>
+    <style>
+      nav ul {
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+        padding: 0;
+      }
+      nav a[aria-current="page"] {
+        font-weight: bold;
+      }
+      .container {
+        padding: 0 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="container">
+      <nav>
+        <ul>
+          <li><a href="/">Acasă</a></li>
+          <li><a href="/bill/new">Factură nouă</a></li>
+          <li><a href="/history">Istoric</a></li>
+          <li><a href="/settings">Setări</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+  </body>
+</html>

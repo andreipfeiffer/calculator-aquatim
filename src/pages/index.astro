@@ -1,0 +1,55 @@
+---
+import Layout from "../components/Layout.astro";
+import "../db/seed";
+import { listBills } from "../db/bills";
+
+const { bills } = listBills(1, 5);
+---
+
+<Layout>
+  <h1>Calculator Aquatim</h1>
+
+  <section>
+    <a href="/bill/new" role="button">Factură nouă</a>
+  </section>
+
+  {
+    bills.length > 0 ? (
+      <section>
+        <h2>Ultimele facturi</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Luna</th>
+              <th>Total</th>
+              <th>Data</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {bills.map((bill) => (
+              <tr>
+                <td>{bill.month}</td>
+                <td>
+                  {(
+                    bill.water_cost +
+                    bill.sewage_cost +
+                    bill.rain_water_cost
+                  ).toFixed(2)}{" "}
+                  lei
+                </td>
+                <td>{bill.created_at}</td>
+                <td>
+                  <a href={`/bill/${bill.id}`}>Detalii</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <a href="/history">Vezi tot istoricul →</a>
+      </section>
+    ) : (
+      <p>Nu există facturi înregistrate.</p>
+    )
+  }
+</Layout>

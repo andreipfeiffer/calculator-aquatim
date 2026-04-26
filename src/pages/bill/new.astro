@@ -1,0 +1,24 @@
+---
+import Layout from "../../components/Layout.astro";
+import "../../db/seed";
+import { listActiveMeters } from "../../db/meters";
+import { getPreviousReadings } from "../../db/bills";
+import BillForm from "../../components/BillForm";
+
+const meters = listActiveMeters();
+const meterIds = meters.map((m) => m.id);
+const previousReadings = getPreviousReadings(meterIds);
+
+const meterData = meters.map((m) => ({
+  id: m.id,
+  name: m.name,
+  rainWater: m.rain_water === 1,
+  submeterOf: m.submeter_of,
+  previousReading: previousReadings.get(m.id) ?? 0,
+}));
+---
+
+<Layout title="Factură nouă">
+  <h1>Factură nouă</h1>
+  <BillForm meters={meterData} client:load />
+</Layout>
