@@ -12,13 +12,13 @@ export interface Meter {
 export function listActiveMeters(): Meter[] {
   return db
     .prepare(`SELECT * FROM meters WHERE active = 1 ORDER BY sort_order, id`)
-    .all() as Meter[];
+    .all() as unknown as Meter[];
 }
 
 export function listAllMeters(): Meter[] {
   return db
     .prepare(`SELECT * FROM meters ORDER BY sort_order, id`)
-    .all() as Meter[];
+    .all() as unknown as Meter[];
 }
 
 export function createMeter(
