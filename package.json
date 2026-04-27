@@ -20,7 +20,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test tests/**/*.test.ts",
+    "test": "node --test src/**/*.test.ts",
     "astro": "astro"
   },
   "dependencies": {
