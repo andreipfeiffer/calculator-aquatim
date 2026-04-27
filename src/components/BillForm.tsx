@@ -275,7 +275,7 @@ export default function BillForm({ meters }: Props) {
                       aria-invalid={readingTooLow || undefined}
                     />
                   </td>
-                  <td>{readings[m.id] ? consumption : "—"}</td>
+                  <td>{readings[m.id] ? consumption.toFixed(2) : "—"}</td>
                 </tr>
               );
             })}
