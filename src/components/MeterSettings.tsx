@@ -5,7 +5,6 @@ interface MeterData {
   name: string;
   rainWater: boolean;
   active: boolean;
-  sortOrder: number;
   submeterOf: number | null;
   currentReading: number;
 }
@@ -41,7 +40,6 @@ export default function MeterSettings({ meters: initial }: Props) {
         name: meter.name,
         rainWater: meter.rainWater,
         active: meter.active,
-        sortOrder: meter.sortOrder,
         submeterOf: meter.submeterOf,
       }),
     });
@@ -99,7 +97,6 @@ export default function MeterSettings({ meters: initial }: Props) {
             <th>Apă pluvială</th>
             <th>Subcontor al</th>
             <th>Activ</th>
-            <th>Ordine</th>
             <th>Index curent</th>
             <th></th>
           </tr>
@@ -152,16 +149,6 @@ export default function MeterSettings({ meters: initial }: Props) {
                   onChange={(e) =>
                     handleChange(m.id, "active", e.target.checked)
                   }
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  value={m.sortOrder}
-                  onChange={(e) =>
-                    handleChange(m.id, "sortOrder", Number(e.target.value))
-                  }
-                  style={{ width: "3em" }}
                 />
               </td>
               <td style={{ display: "flex", gap: "0.25em" }}>

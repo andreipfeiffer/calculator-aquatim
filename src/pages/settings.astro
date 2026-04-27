@@ -12,7 +12,6 @@ const meters = allMeters.map((m) => ({
   name: m.name,
   rainWater: m.rain_water === 1,
   active: m.active === 1,
-  sortOrder: m.sort_order,
   submeterOf: m.submeter_of,
   currentReading: latestReadings.get(m.id) ?? 0,
 }));

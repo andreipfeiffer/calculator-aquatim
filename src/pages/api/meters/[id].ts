@@ -11,7 +11,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
   }
 
   const body = await request.json();
-  const { name, rainWater, active, sortOrder, submeterOf } = body;
+  const { name, rainWater, active, submeterOf } = body;
 
   if (!name || typeof name !== "string") {
     return new Response(JSON.stringify({ error: "name is required" }), {
@@ -20,14 +20,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     });
   }
 
-  updateMeter(
-    id,
-    name,
-    !!rainWater,
-    active !== false,
-    sortOrder ?? 0,
-    submeterOf ?? null,
-  );
+  updateMeter(id, name, !!rainWater, active !== false, submeterOf ?? null);
   return new Response(JSON.stringify({ ok: true }), {
     headers: { "Content-Type": "application/json" },
   });

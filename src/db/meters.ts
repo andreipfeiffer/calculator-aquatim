@@ -39,12 +39,11 @@ export function updateMeter(
   name: string,
   rainWater: boolean,
   active: boolean,
-  sortOrder: number,
   submeterOf: number | null,
 ): void {
   db.prepare(
-    `UPDATE meters SET name = ?, rain_water = ?, active = ?, sort_order = ?, submeter_of = ? WHERE id = ?`,
-  ).run(name, rainWater ? 1 : 0, active ? 1 : 0, sortOrder, submeterOf, id);
+    `UPDATE meters SET name = ?, rain_water = ?, active = ?, submeter_of = ? WHERE id = ?`,
+  ).run(name, rainWater ? 1 : 0, active ? 1 : 0, submeterOf, id);
 }
 
 export function insertReading(meterId: number, value: number): void {
