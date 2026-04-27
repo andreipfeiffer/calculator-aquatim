@@ -51,28 +51,29 @@ export function calculate(
     consumption: Math.max(0, m.currentReading - m.previousReading),
   }));
 
-  const roots = withConsumption.filter((a) => a.submeterOf === null);
-  const subs = withConsumption.filter((a) => a.submeterOf !== null);
+  const mainMeters = withConsumption.filter((a) => a.submeterOf === null);
+  const subMeters = withConsumption.filter((a) => a.submeterOf !== null);
 
   // Build map: parentMeterId → sub-meter entries
-  const subsByParent = new Map<number, typeof withConsumption>();
-  for (const sub of subs) {
-    const list = subsByParent.get(sub.submeterOf!) ?? [];
+  const subMetersByParent = new Map<number, typeof withConsumption>();
+  for (const sub of subMeters) {
+    const list = subMetersByParent.get(sub.submeterOf!) ?? [];
     list.push(sub);
-    subsByParent.set(sub.submeterOf!, list);
+    subMetersByParent.set(sub.submeterOf!, list);
   }
 
-  // Total metered consumption = sum of root meter consumptions only
+  // Total metered consumption = sum of main meters consumptions only
   // (sub-meters are already included in the parent's reading)
-  const totalMeteredConsumption = roots.reduce(
+  const totalMeteredConsumption = mainMeters.reduce(
     (sum, r) => sum + r.consumption,
     0,
   );
 
   const volumeDifference = bill.totalVolume - totalMeteredConsumption;
-  const totalAmount = bill.waterCost + bill.sewageCost + bill.rainWaterCost;
+  const totalCost = bill.waterCost + bill.sewageCost + bill.rainWaterCost;
 
   const rainWaterApartments = withConsumption.filter((c) => c.rainWater);
+  // Fallback to all apartments for rain water distribution if there are non set in settings
   const rainWaterRecipients =
     rainWaterApartments.length > 0 ? rainWaterApartments : withConsumption;
   const rainWaterRecipientIds = new Set(
@@ -85,56 +86,65 @@ export function calculate(
 
   const charges: MeterCharge[] = [];
 
-  for (const root of roots) {
+  for (const mainMeter of mainMeters) {
     const proportion =
       totalMeteredConsumption > 0
-        ? root.consumption / totalMeteredConsumption
-        : 1 / roots.length;
+        ? mainMeter.consumption / totalMeteredConsumption
+        : 1 / mainMeters.length;
 
-    const rootWaterTotal = round2(bill.waterCost * proportion);
-    const rootSewageTotal = round2(bill.sewageCost * proportion);
+    const meterWaterTotal = round2(bill.waterCost * proportion);
+    const meterSewageTotal = round2(bill.sewageCost * proportion);
 
-    const children = subsByParent.get(root.meterId) ?? [];
-    const childConsumption = children.reduce((s, c) => s + c.consumption, 0);
+    const subMeters = subMetersByParent.get(mainMeter.meterId) ?? [];
+    const subMeterConsumption = subMeters.reduce(
+      (s, c) => s + c.consumption,
+      0,
+    );
     const parentNetConsumption = Math.max(
       0,
-      root.consumption - childConsumption,
+      mainMeter.consumption - subMeterConsumption,
     );
 
-    // Split the root's share between parent and sub-meters
-    for (const child of children) {
-      const childProportion =
-        root.consumption > 0 ? child.consumption / root.consumption : 0;
+    // Split the main meter share between parent and sub-meters
+    for (const subMeter of subMeters) {
+      const subMeterProportion =
+        mainMeter.consumption > 0
+          ? subMeter.consumption / mainMeter.consumption
+          : 0;
 
-      const childWater = round2(rootWaterTotal * childProportion);
-      const childSewage = round2(rootSewageTotal * childProportion);
-      const childRain = rainWaterRecipientIds.has(child.meterId)
+      const subMeterWaterCost = round2(meterWaterTotal * subMeterProportion);
+      const subMeterSewageCost = round2(meterSewageTotal * subMeterProportion);
+      const subMeterRainCost = rainWaterRecipientIds.has(subMeter.meterId)
         ? round2(rainWaterPerApartment)
         : 0;
 
       charges.push({
-        meterId: child.meterId,
-        name: child.name,
-        consumption: child.consumption,
-        waterAmount: childWater,
-        sewageAmount: childSewage,
-        rainWaterAmount: childRain,
-        totalAmount: round2(childWater + childSewage + childRain),
+        meterId: subMeter.meterId,
+        name: subMeter.name,
+        consumption: subMeter.consumption,
+        waterAmount: subMeterWaterCost,
+        sewageAmount: subMeterSewageCost,
+        rainWaterAmount: subMeterRainCost,
+        totalAmount: round2(
+          subMeterWaterCost + subMeterSewageCost + subMeterRainCost,
+        ),
       });
     }
 
     const parentProportion =
-      root.consumption > 0 ? parentNetConsumption / root.consumption : 1;
+      mainMeter.consumption > 0
+        ? parentNetConsumption / mainMeter.consumption
+        : 1;
 
-    const parentWater = round2(rootWaterTotal * parentProportion);
-    const parentSewage = round2(rootSewageTotal * parentProportion);
-    const parentRain = rainWaterRecipientIds.has(root.meterId)
+    const parentWater = round2(meterWaterTotal * parentProportion);
+    const parentSewage = round2(meterSewageTotal * parentProportion);
+    const parentRain = rainWaterRecipientIds.has(mainMeter.meterId)
       ? round2(rainWaterPerApartment)
       : 0;
 
     charges.push({
-      meterId: root.meterId,
-      name: root.name,
+      meterId: mainMeter.meterId,
+      name: mainMeter.name,
       consumption: parentNetConsumption,
       waterAmount: parentWater,
       sewageAmount: parentSewage,
@@ -145,7 +155,7 @@ export function calculate(
 
   // Adjust rounding errors so the sum of charges matches the bill total exactly.
   const chargesTotal = charges.reduce((sum, c) => sum + c.totalAmount, 0);
-  const roundingError = round2(totalAmount - chargesTotal);
+  const roundingError = round2(totalCost - chargesTotal);
 
   if (roundingError !== 0 && charges.length > 0) {
     const largest = charges.reduce((max, c) =>
