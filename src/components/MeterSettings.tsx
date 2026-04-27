@@ -45,7 +45,7 @@ export default function MeterSettings({ meters: initial }: Props) {
     });
 
     if (res.ok) {
-      setMessage(`${meter.name} salvat.`);
+      setMessage(`${meter.name} salvat`);
     } else {
       const data = await res.json();
       setMessage(`Eroare: ${data.error}`);
@@ -65,7 +65,7 @@ export default function MeterSettings({ meters: initial }: Props) {
     });
 
     if (res.ok) {
-      setMessage(`Index ${meter.name} salvat.`);
+      setMessage(`Index ${meter.name} salvat`);
     } else {
       const data = await res.json();
       setMessage(`Eroare: ${data.error}`);
@@ -77,9 +77,32 @@ export default function MeterSettings({ meters: initial }: Props) {
   // Root meters (not sub-meters) for the submeterOf dropdown
   const rootMeters = meters.filter((m) => m.submeterOf === null);
 
+  const isError = message?.startsWith("Eroare");
+
   return (
     <div>
-      {message && <p>{message}</p>}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "1em",
+        }}
+      >
+        <h1>Setări contoare</h1>
+        {message && (
+          <b
+            style={{
+              color: isError
+                ? "var(--pico-del-color, #c62828)"
+                : "var(--pico-ins-color, #2e7d32)",
+              fontSize: "0.85rem",
+            }}
+          >
+            {message}
+          </b>
+        )}
+      </div>
 
       <style>{`
         .settings-table td input,
