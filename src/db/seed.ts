@@ -15,10 +15,15 @@ export function seedIfEmpty(): void {
   if (count > 0) return;
 
   const meters = [
-    { name: "Ap. 1 Pf", rainWater: true, sortOrder: 1, submeterOf: null },
-    { name: "Ap. 2 Chiriasi", rainWater: false, sortOrder: 2, submeterOf: null },
-    { name: "Subsol", rainWater: false, sortOrder: 3, submeterOf: null },
-    { name: "Casa Flore", rainWater: true, sortOrder: 4, submeterOf: 2 },
+    { name: "Ap.1 Pfeiffer", rainWater: true, sortOrder: 1, submeterOf: null },
+    {
+      name: "Ap.2 Chiriasi",
+      rainWater: false,
+      sortOrder: 2,
+      submeterOf: null,
+    },
+    { name: "Subsol", rainWater: false, sortOrder: 4, submeterOf: null },
+    { name: "Casa Flore", rainWater: true, sortOrder: 3, submeterOf: 2 },
   ];
 
   const insertMeter = db.prepare(
